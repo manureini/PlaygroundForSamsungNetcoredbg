@@ -30,7 +30,12 @@ namespace TestDebugger
                 Console.WriteLine(thread.Id + " " + thread.Name);
             }
 
-            DebugHelper.AddBreakPoint(21); //line 21
+            DebugHelper.AddBreakPoint(21);
+            DebugHelper.AddBreakPoint(22);
+
+            Thread.Sleep(4000);
+
+            DebugHelper.AddBreakPoint(24);
 
             Console.ReadLine();
 

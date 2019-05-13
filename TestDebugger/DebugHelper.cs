@@ -110,8 +110,16 @@ namespace TestDebugger
             br.Breakpoints = mBreakPoints.Select(b => new SourceBreakpoint(b)).ToList();
 
             var bresponse = mClient.SendRequestSync(br);
-        }
 
+            if (bresponse.Breakpoints.Any(b => b.Verified))
+            {
+                Console.WriteLine("SetBreakpointsRequest response: Breakpoint verified!");
+            }
+            else
+            {
+                Console.WriteLine("SetBreakpointsRequest response: Breakpoint NOT verified!");
+            }
+        }
 
         public static void Detach()
         {
@@ -129,6 +137,16 @@ namespace TestDebugger
         private static void Client_EventReceived(object sender, EventReceivedEventArgs e)
         {
             Console.WriteLine("Event: " + e.EventType);
+
+            if (e.EventType == "breakpoint")
+            {
+                var be = e.Body as BreakpointEvent;
+
+                Console.WriteLine("Breakpoint event");
+                Console.WriteLine(be.Reason);
+                Breakpoint breakpoint = be.Breakpoint;
+                Console.WriteLine("id: " + breakpoint.Id + "  message: " + breakpoint.Message + "  line: " + breakpoint.Line + "  verified: " + breakpoint.Verified);
+            }
         }
     }
 }
