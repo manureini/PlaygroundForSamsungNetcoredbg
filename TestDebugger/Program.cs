@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -11,6 +12,7 @@ namespace TestDebugger
 
         static void Main(string[] args)
         {
+
             Console.WriteLine("Wait 3s...");
             Thread.Sleep(3000);
 
@@ -22,6 +24,12 @@ namespace TestDebugger
 
             DebugHelper.Attach(pid);
 
+
+            /*
+            string toStart = Path.GetFullPath(@"..\..\..\..\TestPlayground\bin\Debug\netcoreapp3.0\TestPlayground.dll");
+            DebugHelper.Launch(toStart, false);
+            */
+
             Console.WriteLine("threads: ");
             var resp = DebugHelper.GetThreads();
 
@@ -29,6 +37,8 @@ namespace TestDebugger
             {
                 Console.WriteLine(thread.Id + " " + thread.Name);
             }
+
+            Thread.Sleep(3000);
 
             DebugHelper.AddBreakPoint(21);
             DebugHelper.AddBreakPoint(22);

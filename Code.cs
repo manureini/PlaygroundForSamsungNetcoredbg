@@ -19,7 +19,7 @@ namespace TestPlayground
             while (true)
             {
                 Console.WriteLine(i++);
-                Console.WriteLine("Debugger attached:" + Debugger.IsAttached);
+                Console.WriteLine("Debugger attached:" + Debugger.IsAttached); 
                 //    Debugger.Break();
                 Thread.Sleep(500);
             }

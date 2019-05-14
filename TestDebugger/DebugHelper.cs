@@ -16,7 +16,30 @@ namespace TestDebugger
 
         private static List<int> mBreakPoints = new List<int>();
 
+
+        public static void Launch(string pFile, bool pStopAtEntry)
+        {
+            StartDebugger(() =>
+            {
+                LaunchRequest lr = new LaunchRequest();
+                lr.NoDebug = false;
+                lr.ConfigurationProperties.Add("program", pFile);
+                lr.ConfigurationProperties.Add("stopAtEntry", pStopAtEntry);
+                mClient.SendRequestSync(lr);
+            });
+        }
+
         public static void Attach(int pProcessId)
+        {
+            StartDebugger(() =>
+            {
+                AttachRequest ar = new AttachRequest();
+                ar.Args.ConfigurationProperties.Add("processId", pProcessId);
+                mClient.SendRequestSync(ar);
+            });
+        }
+
+        private static void StartDebugger(Action pAction)
         {
             if (mDebuggerProcess != null)
                 Detach();
@@ -45,12 +68,9 @@ namespace TestDebugger
             ir.SupportsVariablePaging = true;
             ir.SupportsVariableType = true;
             ir.SupportsRunInTerminalRequest = true;
-
             var repsonse = mClient.SendRequestSync(ir);
 
-            AttachRequest ar = new AttachRequest();
-            ar.Args.ConfigurationProperties.Add("processId", pProcessId);
-            mClient.SendRequestSync(ar);
+            pAction.Invoke();
 
             ConfigurationDoneRequest cr = new ConfigurationDoneRequest();
             mClient.SendRequestSync(cr);
@@ -91,7 +111,7 @@ namespace TestDebugger
 
         private static void UpdateBreakPoints()
         {
-            string file = Path.GetFullPath(@"..\..\..\..\TestPlayground\Code.cs");
+            string file = Path.GetFullPath(@"..\..\..\..\Code.cs");
 
             if (!File.Exists(file))
                 throw new Exception();
@@ -138,14 +158,15 @@ namespace TestDebugger
         {
             Console.WriteLine("Event: " + e.EventType);
 
-            if (e.EventType == "breakpoint")
+            if (e.Body is BreakpointEvent be)
             {
-                var be = e.Body as BreakpointEvent;
-
-                Console.WriteLine("Breakpoint event");
                 Console.WriteLine(be.Reason);
                 Breakpoint breakpoint = be.Breakpoint;
                 Console.WriteLine("id: " + breakpoint.Id + "  message: " + breakpoint.Message + "  line: " + breakpoint.Line + "  verified: " + breakpoint.Verified);
+            }
+            else if (e.Body is OutputEvent oe)
+            {
+                Console.WriteLine("Debugee: " + oe.Output.Trim());
             }
         }
     }
